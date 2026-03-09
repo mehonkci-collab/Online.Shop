@@ -294,6 +294,16 @@ function renderTestimonials() {
   const currentStoreData = getStoreData();
   const testimonials = currentStoreData.testimonials || [];
   
+  // Function to get initials from name
+  const getInitials = (name) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+  
   if (testimonials.length === 0) {
     testimonialsGrid.innerHTML = `
       <div class="empty-state">
@@ -310,7 +320,9 @@ function renderTestimonials() {
   testimonialsGrid.innerHTML = testimonials.map((testimonial, index) => `
     <div class="testimonial-card" style="animation-delay: ${index * 0.1}s">
       <div class="testimonial-header">
-        <img src="${testimonial.image}" alt="${testimonial.name}" class="testimonial-avatar">
+        <div class="testimonial-avatar">
+          <span class="testimonial-initials">${getInitials(testimonial.name)}</span>
+        </div>
         <div class="testimonial-info">
           <h4 class="testimonial-name">${testimonial.name}</h4>
           <div class="testimonial-rating">
