@@ -1490,8 +1490,18 @@ h4 { font-size: 20px; }
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  object-fit: cover;
+  background: linear-gradient(135deg, #C9A962, #B8974F);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 2px solid var(--accent-gold);
+}
+
+.testimonial-initials {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .testimonial-info {
