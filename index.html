@@ -27,7 +27,7 @@
       </div>
       
 <ul class="nav-menu">
-        <li><a href="#home" class="nav-link active">Beranda</a></li>
+        <li><a href="#home" class="nav-link">Beranda</a></li>
         <li><a href="#products" class="nav-link">Produk</a></li>
         <li><a href="#testimonials" class="nav-link">Testimoni</a></li>
         <li><a href="#about" class="nav-link">Tentang Kami</a></li>
@@ -148,11 +148,62 @@
         <p class="section-subtitle">Apa kata pelanggan kami tentang pengalaman belanja</p>
       </div>
       
+      <div class="testimonial-cta">
+        <button id="addTestimonialBtn" class="hero-btn">Beri Testimoni</button>
+      </div>
+      
       <div id="testimonialsGrid" class="testimonials-grid">
         <!-- Testimonials will be rendered by JavaScript -->
       </div>
     </div>
   </section>
+
+  <!-- Testimonial Submission Modal -->
+  <div id="testimonialModal" class="modal-overlay">
+    <div class="modal testimonial-modal">
+      <button class="modal-close" id="closeTestimonialModal">&times;</button>
+      <div class="testimonial-form-container">
+        <h2 class="testimonial-form-title">Beri Testimoni Anda</h2>
+        <p class="testimonial-form-subtitle">Bagikan pengalaman belanja Anda dengan kami</p>
+        
+        <form id="testimonialForm" class="testimonial-form">
+          <div class="form-group">
+            <label for="customerName">Nama Lengkap *</label>
+            <input type="text" id="customerName" placeholder="Masukkan nama lengkap Anda" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Rating *</label>
+            <div class="star-rating" id="starRating">
+              <span class="star" data-value="1">★</span>
+              <span class="star" data-value="2">★</span>
+              <span class="star" data-value="3">★</span>
+              <span class="star" data-value="4">★</span>
+              <span class="star" data-value="5">★</span>
+            </div>
+            <input type="hidden" id="customerRating" value="5">
+          </div>
+          
+          <div class="form-group">
+            <label for="customerComment">Komentar *</label>
+            <textarea id="customerComment" rows="4" placeholder="Tulis pengalaman Anda belanja di toko kami..." required></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Foto (Opsional)</label>
+            <div class="image-upload-area" id="customerImageUpload">
+              <p>Klik untuk upload foto</p>
+              <p style="font-size: 12px; color: #666;">PNG, JPG max 5MB</p>
+              <input type="file" id="customerTestimonialImage" accept="image/*" style="display: none;">
+            </div>
+            <div id="customerImagePreview" class="image-preview-grid"></div>
+          </div>
+          
+          <button type="submit" class="buy-btn">Kirim Testimoni</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <!-- About Section -->
   <section id="about" class="about-section">
@@ -169,12 +220,13 @@
         <p>Premium fashion for the modern individual. Discover timeless elegance and quality craftsmanship in every piece.</p>
       </div>
       
-      <div class="footer-section">
+      <ul class="footer-section">
         <h4>Tautan Cepat</h4>
-        <a href="#home">Beranda</a>
-        <a href="#products">Produk</a>
-        <a href="#about">Tentang Kami</a>
-      </div>
+        <li><a href="#home">Beranda</a></li>
+        <li><a href="#products">Produk</a></li>
+        <li><a href="#testimonials">Testimoni</a></li>
+        <li><a href="#about">Tentang Kami</a></li>
+      </ul>
       
       <div class="footer-section">
         <h4>Hubungi Kami</h4>
@@ -184,13 +236,14 @@
       </div>
       
       <div class="footer-section">
-        <h4>Admin</h4>
-        <a href="admin.html">Panel Admin</a>
+        <h4>Logo Toko</h4>
+        <img src="https://png.pngtree.com/png-clipart/20200721/original/pngtree-online-shop-logo-design-vector-png-image_4825112.jpg" alt="OnlineShop" class="img-logo">
       </div>
     </div>
     
     <div class="footer-bottom">
       <p>&copy; 2024 LUXE FASHION. All rights reserved.</p>
+      <a href="admin.html" class="Admin">Panel Admin</a>
     </div>
   </footer>
 
@@ -205,4 +258,3 @@
   <script src="main.js"></script>
 </body>
 </html>
-
