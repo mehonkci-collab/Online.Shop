@@ -339,11 +339,15 @@ function renderTestimonials() {
         </div>
       </div>
       <p class="testimonial-comment">"${testimonial.comment}"</p>
-      ${testimonial.productImage ? `
+      ${(testimonial.images && testimonial.images.length > 0) ? `
+        <div class="testimonial-product" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          ${testimonial.images.map(img => `<img src="${img}" alt="Foto" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;">`).join('')}
+        </div>
+      ` : (testimonial.productImage ? `
         <div class="testimonial-product">
           <img src="${testimonial.productImage}" alt="Produk yang dibeli">
         </div>
-      ` : ''}
+      ` : '')}
     </div>
   `).join('');
 }
@@ -808,7 +812,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // CUSTOMER TESTIMONIAL SUBMISSION
 // ============================================
 
-let customerTestimonialImage = null;
+let customerTestimonialImages = []; // Array to store up to 5 images
+const MAX_TESTIMONIAL_IMAGES = 5;
 
 // Initialize testimonial form
 function initTestimonialForm() {
@@ -868,28 +873,37 @@ function initTestimonialForm() {
     updateStarDisplay(stars, 5);
   }
   
-  // Image upload
+  // Image upload - support multiple files up to 5
   if (imageUpload && imageInput) {
     imageUpload.addEventListener('click', () => {
       imageInput.click();
     });
     
     imageInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
       
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('Ukuran file maksimal 5MB', 'error');
+      // Check if adding these files would exceed the limit
+      if (customerTestimonialImages.length + files.length > MAX_TESTIMONIAL_IMAGES) {
+        showToast(`Maksimal ${MAX_TESTIMONIAL_IMAGES} foto diperbolehkan`, 'error');
         return;
       }
       
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        customerTestimonialImage = event.target.result;
-        renderCustomerImagePreview();
-      };
-      reader.readAsDataURL(file);
+      // Process each file
+      files.forEach(file => {
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          showToast('Ukuran file maksimal 5MB', 'error');
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          customerTestimonialImages.push(event.target.result);
+          renderCustomerImagePreview();
+        };
+        reader.readAsDataURL(file);
+      });
       
       // Reset input
       imageInput.value = '';
@@ -929,7 +943,7 @@ function resetTestimonialForm() {
   const form = document.getElementById('testimonialForm');
   if (form) form.reset();
   
-  customerTestimonialImage = null;
+  customerTestimonialImages = []; // Reset array to empty
   
   // Reset star rating to 5
   const stars = document.querySelectorAll('#starRating .star');
@@ -957,21 +971,21 @@ function renderCustomerImagePreview() {
   const preview = document.getElementById('customerImagePreview');
   if (!preview) return;
   
-  if (!customerTestimonialImage) {
+  if (customerTestimonialImages.length === 0) {
     preview.innerHTML = '';
     return;
   }
   
-  preview.innerHTML = `
+  preview.innerHTML = customerTestimonialImages.map((img, index) => `
     <div class="image-preview-item" style="position: relative;">
-      <img src="${customerTestimonialImage}" alt="Preview">
-      <button type="button" class="remove-btn" onclick="removeCustomerTestimonialImage()">×</button>
+      <img src="${img}" alt="Preview ${index + 1}">
+      <button type="button" class="remove-btn" onclick="removeCustomerTestimonialImage(${index})">×</button>
     </div>
-  `;
+  `).join('');
 }
 
-window.removeCustomerTestimonialImage = function() {
-  customerTestimonialImage = null;
+window.removeCustomerTestimonialImage = function(index) {
+  customerTestimonialImages.splice(index, 1);
   renderCustomerImagePreview();
 };
 
@@ -1003,13 +1017,13 @@ function submitCustomerTestimonial() {
     ? Math.max(...storeData.testimonials.map(t => t.id)) + 1 
     : 1;
   
-  // Create new testimonial object
+  // Create new testimonial object with images array
   const newTestimonial = {
     id: newId,
     name: name,
     rating: rating || 5,
     comment: comment,
-    image: customerTestimonialImage || null,
+    images: customerTestimonialImages.length > 0 ? customerTestimonialImages : null,
     productImage: null,
     isCustomerSubmitted: true
   };
