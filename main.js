@@ -320,9 +320,15 @@ function renderTestimonials() {
   testimonialsGrid.innerHTML = testimonials.map((testimonial, index) => `
     <div class="testimonial-card" style="animation-delay: ${index * 0.1}s">
       <div class="testimonial-header">
-        <div class="testimonial-avatar">
-          <span class="testimonial-initials">${getInitials(testimonial.name)}</span>
-        </div>
+        ${testimonial.image ? `
+          <div class="testimonial-avatar" style="overflow: hidden;">
+            <span class="testimonial-initials">${getInitials(testimonial.name)}</span>
+          </div>
+        ` : `
+          <div class="testimonial-avatar">
+            <span class="testimonial-initials">${getInitials(testimonial.name)}</span>
+          </div>
+        `}
         <div class="testimonial-info">
           <h4 class="testimonial-name">${testimonial.name}</h4>
           <div class="testimonial-rating">
@@ -779,16 +785,250 @@ document.addEventListener('DOMContentLoaded', () => {
   // Render products
   renderProducts();
   
+  // Render testimonials when page loads
+  renderTestimonials();
+  
+  // Initialize testimonial form for customer submissions
+  initTestimonialForm();
+  
   // Handle URL hash on load
   const hash = window.location.hash;
   if (hash === '#about') {
     showAbout();
   } else if (hash === '#products') {
     showProducts();
+  } else if (hash === '#testimonials') {
+    showTestimonials();
   } else {
     showHome();
   }
 });
+
+// ============================================
+// CUSTOMER TESTIMONIAL SUBMISSION
+// ============================================
+
+let customerTestimonialImage = null;
+
+// Initialize testimonial form
+function initTestimonialForm() {
+  const addBtn = document.getElementById('addTestimonialBtn');
+  const modal = document.getElementById('testimonialModal');
+  const closeBtn = document.getElementById('closeTestimonialModal');
+  const form = document.getElementById('testimonialForm');
+  const starRating = document.getElementById('starRating');
+  const imageUpload = document.getElementById('customerImageUpload');
+  const imageInput = document.getElementById('customerTestimonialImage');
+  
+  // Open modal
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      openTestimonialModal();
+    });
+  }
+  
+  // Close modal
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      closeTestimonialModal();
+    });
+  }
+  
+  // Close on overlay click
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeTestimonialModal();
+      }
+    });
+  }
+  
+  // Star rating interaction
+  if (starRating) {
+    const stars = starRating.querySelectorAll('.star');
+    stars.forEach(star => {
+      star.addEventListener('click', () => {
+        const value = parseInt(star.dataset.value);
+        document.getElementById('customerRating').value = value;
+        updateStarDisplay(stars, value);
+      });
+      
+      star.addEventListener('mouseover', () => {
+        const value = parseInt(star.dataset.value);
+        updateStarDisplay(stars, value);
+      });
+      
+      star.addEventListener('mouseout', () => {
+        const currentRating = parseInt(document.getElementById('customerRating').value);
+        updateStarDisplay(stars, currentRating);
+      });
+    });
+    
+    // Initialize with 5 stars
+    updateStarDisplay(stars, 5);
+  }
+  
+  // Image upload
+  if (imageUpload && imageInput) {
+    imageUpload.addEventListener('click', () => {
+      imageInput.click();
+    });
+    
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Ukuran file maksimal 5MB', 'error');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        customerTestimonialImage = event.target.result;
+        renderCustomerImagePreview();
+      };
+      reader.readAsDataURL(file);
+      
+      // Reset input
+      imageInput.value = '';
+    });
+  }
+  
+  // Form submission
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitCustomerTestimonial();
+    });
+  }
+}
+
+function openTestimonialModal() {
+  const modal = document.getElementById('testimonialModal');
+  if (!modal) return;
+  
+  // Reset form
+  resetTestimonialForm();
+  
+  // Show modal
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeTestimonialModal() {
+  const modal = document.getElementById('testimonialModal');
+  if (!modal) return;
+  
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function resetTestimonialForm() {
+  const form = document.getElementById('testimonialForm');
+  if (form) form.reset();
+  
+  customerTestimonialImage = null;
+  
+  // Reset star rating to 5
+  const stars = document.querySelectorAll('#starRating .star');
+  updateStarDisplay(stars, 5);
+  document.getElementById('customerRating').value = 5;
+  
+  // Clear image preview
+  const preview = document.getElementById('customerImagePreview');
+  if (preview) preview.innerHTML = '';
+}
+
+function updateStarDisplay(stars, value) {
+  stars.forEach((star, index) => {
+    if (index < value) {
+      star.classList.add('filled');
+      star.classList.add('active');
+    } else {
+      star.classList.remove('filled');
+      star.classList.remove('active');
+    }
+  });
+}
+
+function renderCustomerImagePreview() {
+  const preview = document.getElementById('customerImagePreview');
+  if (!preview) return;
+  
+  if (!customerTestimonialImage) {
+    preview.innerHTML = '';
+    return;
+  }
+  
+  preview.innerHTML = `
+    <div class="image-preview-item" style="position: relative;">
+      <img src="${customerTestimonialImage}" alt="Preview">
+      <button type="button" class="remove-btn" onclick="removeCustomerTestimonialImage()">×</button>
+    </div>
+  `;
+}
+
+window.removeCustomerTestimonialImage = function() {
+  customerTestimonialImage = null;
+  renderCustomerImagePreview();
+};
+
+function submitCustomerTestimonial() {
+  const name = document.getElementById('customerName')?.value;
+  const rating = parseInt(document.getElementById('customerRating')?.value);
+  const comment = document.getElementById('customerComment')?.value;
+  
+  // Validation
+  if (!name || !comment) {
+    showToast('Mohon lengkapi nama dan komentar', 'error');
+    return;
+  }
+  
+  // Get store data
+  const storeData = getStoreData();
+  if (!storeData) {
+    showToast('Gagal memuat data', 'error');
+    return;
+  }
+  
+  // Initialize testimonials array if not exists
+  if (!storeData.testimonials) {
+    storeData.testimonials = [];
+  }
+  
+  // Generate new ID
+  const newId = storeData.testimonials.length > 0 
+    ? Math.max(...storeData.testimonials.map(t => t.id)) + 1 
+    : 1;
+  
+  // Create new testimonial object
+  const newTestimonial = {
+    id: newId,
+    name: name,
+    rating: rating || 5,
+    comment: comment,
+    image: customerTestimonialImage || null,
+    productImage: null,
+    isCustomerSubmitted: true
+  };
+  
+  // Add to testimonials array (at the beginning for immediate visibility)
+  storeData.testimonials.unshift(newTestimonial);
+  
+  // Save to localStorage
+  saveStoreData(storeData);
+  
+  // Close modal
+  closeTestimonialModal();
+  
+  // Re-render testimonials
+  renderTestimonials();
+  
+  // Show success message
+  showToast('Terima kasih! Testimoni Anda telah ditambahkan.', 'success');
+}
 
 // Export storeData for admin access
 window.storeData = storeData;
