@@ -677,8 +677,8 @@ function saveAboutInfo() {
 // ============================================
 
 let editingTestimonialId = null;
-let testimonialImage = null;
-let testimonialProductImage = null;
+let testimonialImages = []; // Array to store up to 5 images
+const MAX_TESTIMONIAL_IMAGES = 5;
 
 function renderTestimonialsTable() {
   const tableBody = document.getElementById('testimonialsTableBody');
@@ -695,10 +695,13 @@ function renderTestimonialsTable() {
   tableBody.innerHTML = testimonials.map(t => {
     // Generate initials from name
     const initials = t.name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().substring(0, 2);
+    // Get images array or fallback to single image
+    const images = t.images || (t.image ? [t.image] : []);
+    const firstImage = images.length > 0 ? images[0] : null;
     return `
     <tr>
       <td>${t.id}</td>
-      <td><div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg, #C9A962, #B8974F);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:16px;">${initials}</div></td>
+      <td>${firstImage ? `<img src="${firstImage}" alt="Foto" style="width:50px;height:50px;object-fit:cover;border-radius:4px;">` : `<div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg, #C9A962, #B8974F);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:16px;">${initials}</div>`}</td>
       <td>${t.name}</td>
       <td>${Array(5).fill(0).map((_,i) => '<span style="color:' + (i < t.rating ? '#C9A962' : '#ddd') + '">★</span>').join('')}</td>
       <td>${t.comment.substring(0,50)}${t.comment.length > 50 ? '...' : ''}</td>
@@ -716,59 +719,58 @@ function initTestimonialForm() {
   const nameInput = document.getElementById('testimonialName');
   const ratingSelect = document.getElementById('testimonialRating');
   const commentInput = document.getElementById('testimonialComment');
-  const productImageInput = document.getElementById('testimonialProductImage');
+  const imagesInput = document.getElementById('testimonialImages');
   const saveBtn = document.getElementById('saveTestimonialBtn');
   const cancelBtn = document.getElementById('cancelTestimonialEditBtn');
   const formTitle = document.getElementById('testimonialFormTitle');
   
   // Reset form to add mode
   editingTestimonialId = null;
-  testimonialImage = null;
-  testimonialProductImage = null;
+  testimonialImages = [];
   
   // Clear input fields
   if (nameInput) nameInput.value = '';
   if (ratingSelect) ratingSelect.value = '5';
   if (commentInput) commentInput.value = '';
   
-  // Clear image previews - hide customer photo preview, keep product photo
-  const imagePreview = document.getElementById('testimonialImagePreview');
-  const productImagePreview = document.getElementById('testimonialProductImagePreview');
-  if (imagePreview) imagePreview.innerHTML = '';
-  if (productImagePreview) productImagePreview.innerHTML = '';
-  
-  // Hide customer photo upload section entirely
-  const customerPhotoSection = imagePreview?.closest('.form-group');
-  if (customerPhotoSection) {
-    customerPhotoSection.style.display = 'none';
-  }
+  // Clear image previews
+  const imagesPreview = document.getElementById('testimonialImagesPreview');
+  if (imagesPreview) imagesPreview.innerHTML = '';
   
   // Reset form title and buttons
   if (formTitle) formTitle.textContent = 'Tambah Testimoni Baru';
   if (cancelBtn) cancelBtn.style.display = 'none';
   if (saveBtn) saveBtn.textContent = 'Simpan Testimoni';
   
-  // Set up product photo upload only (not customer photo)
-  if (productImageInput) {
-    productImageInput.onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+  // Set up image upload handler
+  if (imagesInput) {
+    imagesInput.onchange = (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
       
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('Ukuran file maksimal 5MB', 'error');
+      // Check if adding these files would exceed the limit
+      if (testimonialImages.length + files.length > MAX_TESTIMONIAL_IMAGES) {
+        showToast(`Maksimal ${MAX_TESTIMONIAL_IMAGES} foto diperbolehkan`, 'error');
         return;
       }
       
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        testimonialProductImage = ev.target.result;
-        const preview = document.getElementById('testimonialProductImagePreview');
-        if (preview) {
-          preview.innerHTML = `<img src="${ev.target.result}" style="width:80px;height:80px;object-fit:cover;border-radius:4px;">`;
+      // Process each file
+      files.forEach(file => {
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          showToast('Ukuran file maksimal 5MB', 'error');
+          return;
         }
-      };
-      reader.readAsDataURL(file);
+        
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          testimonialImages.push(ev.target.result);
+          renderTestimonialImagePreview();
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      // Reset input
       e.target.value = '';
     };
   }
@@ -787,6 +789,28 @@ function initTestimonialForm() {
   }
 }
 
+function renderTestimonialImagePreview() {
+  const preview = document.getElementById('testimonialImagesPreview');
+  if (!preview) return;
+  
+  if (testimonialImages.length === 0) {
+    preview.innerHTML = '';
+    return;
+  }
+  
+  preview.innerHTML = testimonialImages.map((img, index) => `
+    <div class="image-preview-item" style="position: relative;">
+      <img src="${img}" alt="Preview ${index + 1}">
+      <button type="button" class="remove-btn" onclick="removeTestimonialImage(${index})">×</button>
+    </div>
+  `).join('');
+}
+
+window.removeTestimonialImage = function(index) {
+  testimonialImages.splice(index, 1);
+  renderTestimonialImagePreview();
+};
+
 function resetTestimonialForm() {
   const nameInput = document.getElementById('testimonialName');
   const ratingSelect = document.getElementById('testimonialRating');
@@ -796,8 +820,7 @@ function resetTestimonialForm() {
   const saveBtn = document.getElementById('saveTestimonialBtn');
   
   editingTestimonialId = null;
-  testimonialImage = null;
-  testimonialProductImage = null;
+  testimonialImages = [];
   
   // Clear input fields
   if (nameInput) nameInput.value = '';
@@ -805,15 +828,8 @@ function resetTestimonialForm() {
   if (commentInput) commentInput.value = '';
   
   // Clear image previews
-  document.getElementById('testimonialImagePreview').innerHTML = '';
-  document.getElementById('testimonialProductImagePreview').innerHTML = '';
-  
-  // Hide customer photo upload section
-  const imagePreview = document.getElementById('testimonialImagePreview');
-  const customerPhotoSection = imagePreview?.closest('.form-group');
-  if (customerPhotoSection) {
-    customerPhotoSection.style.display = 'none';
-  }
+  const imagesPreview = document.getElementById('testimonialImagesPreview');
+  if (imagesPreview) imagesPreview.innerHTML = '';
   
   // Reset form title and buttons
   if (formTitle) formTitle.textContent = 'Tambah Testimoni Baru';
@@ -852,8 +868,8 @@ function saveTestimonial() {
         name,
         rating,
         comment,
-        image: testimonialImage || storeData.testimonials[idx].image,
-        productImage: testimonialProductImage || storeData.testimonials[idx].productImage
+        images: testimonialImages.length > 0 ? testimonialImages : storeData.testimonials[idx].images,
+        image: testimonialImages.length > 0 ? testimonialImages[0] : storeData.testimonials[idx].image
       };
       showToast('Testimoni berhasil diperbarui!', 'success');
     }
@@ -868,8 +884,8 @@ function saveTestimonial() {
       name,
       rating,
       comment,
-      image: testimonialImage || 'https://via.placeholder.com/150?text=User',
-      productImage: testimonialProductImage || null
+      images: testimonialImages.length > 0 ? testimonialImages : null,
+      image: testimonialImages.length > 0 ? testimonialImages[0] : null
     });
     showToast('Testimoni berhasil ditambahkan!', 'success');
   }
@@ -885,25 +901,16 @@ window.editTestimonial = function(id) {
   if (!t) return;
   
   editingTestimonialId = id;
-  testimonialImage = t.image;
-  testimonialProductImage = t.productImage;
+  // Get images array or fallback to single image
+  testimonialImages = t.images || (t.image ? [t.image] : []);
   
   // Fill form fields
   document.getElementById('testimonialName').value = t.name;
   document.getElementById('testimonialRating').value = t.rating;
   document.getElementById('testimonialComment').value = t.comment;
   
-  // Show existing product image in preview (customer photo is hidden)
-  if (t.productImage) {
-    document.getElementById('testimonialProductImagePreview').innerHTML = '<img src="' + t.productImage + '" style="width:80px;height:80px;object-fit:cover;border-radius:4px;">';
-  }
-  
-  // Hide customer photo upload section
-  const imagePreview = document.getElementById('testimonialImagePreview');
-  const customerPhotoSection = imagePreview?.closest('.form-group');
-  if (customerPhotoSection) {
-    customerPhotoSection.style.display = 'none';
-  }
+  // Show existing images in preview
+  renderTestimonialImagePreview();
   
   // Update form title and show cancel button for edit mode
   const formTitle = document.getElementById('testimonialFormTitle');
@@ -1015,5 +1022,4 @@ function showToast(message, type = 'info') {
     }, 300);
   }, 3000);
 }
-
 
