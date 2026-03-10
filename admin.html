@@ -330,23 +330,13 @@
           </div>
           
           <div class="form-group">
-            <label>Foto Pelanggan (Opsional)</label>
-            <div class="image-upload-area" onclick="document.getElementById('testimonialImage').click()">
-              <p>Klik untuk upload foto pelanggan</p>
-              <p style="font-size: 12px; color: #666;">PNG, JPG max 5MB</p>
-              <input type="file" id="testimonialImage" accept="image/*" style="display: none;">
+            <label>Foto Testimoni (Opsional) - Maksimal 5 foto</label>
+            <div class="image-upload-area" onclick="document.getElementById('testimonialImages').click()">
+              <p>Klik untuk upload foto</p>
+              <p style="font-size: 12px; color: #666;">PNG, JPG max 5MB per file, maksimal 5 foto</p>
+              <input type="file" id="testimonialImages" accept="image/*" multiple style="display: none;">
             </div>
-            <div id="testimonialImagePreview" style="margin-top: 10px;"></div>
-          </div>
-          
-          <div class="form-group">
-            <label>Foto Produk (Opsional)</label>
-            <div class="image-upload-area" onclick="document.getElementById('testimonialProductImage').click()">
-              <p>Klik untuk upload foto produk</p>
-              <p style="font-size: 12px; color: #666;">PNG, JPG max 5MB</p>
-              <input type="file" id="testimonialProductImage" accept="image/*" style="display: none;">
-            </div>
-            <div id="testimonialProductImagePreview" style="margin-top: 10px;"></div>
+            <div id="testimonialImagesPreview" class="image-preview-grid" style="margin-top: 10px;"></div>
           </div>
           
           <div style="display: flex; gap: 10px;">
