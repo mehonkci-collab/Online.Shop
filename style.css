@@ -902,6 +902,16 @@ h4 { font-size: 20px; }
   font-size: 13px;
 }
 
+.img-logo {
+  width: 50%;
+  height: 60%;
+}
+
+.Admin {
+  color: #B8974F;
+  
+}
+
 /* ============================================
    ADMIN PANEL STYLES
    ============================================ */
@@ -1162,6 +1172,11 @@ h4 { font-size: 20px; }
   .main-image {
     height: 300px;
   }
+
+  .img-logo {
+    display: block;
+    margin: auto;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1238,6 +1253,11 @@ h4 { font-size: 20px; }
   .checkout-section,
   .about-section {
     padding: 100px var(--spacing-md) var(--spacing-lg);
+  }
+
+  .img-logo {
+    display: block;
+    margin: auto;
   }
   
   .admin-header {
@@ -1323,6 +1343,11 @@ h4 { font-size: 20px; }
   
   .image-preview-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .img-logo {
+    display: block;
+    margin: auto;
   }
   
   .admin-table {
@@ -1547,5 +1572,136 @@ h4 { font-size: 20px; }
   height: 80px;
   object-fit: cover;
   border-radius: 4px;
+}
+
+/* ============================================
+   TESTIMONIAL FORM (Customer Submission)
+   ============================================ */
+.testimonial-cta {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.testimonial-modal {
+  max-width: 500px;
+  padding: var(--spacing-lg);
+}
+
+.testimonial-form-container {
+  padding: var(--spacing-md) 0;
+}
+
+.testimonial-form-title {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.testimonial-form-subtitle {
+  text-align: center;
+  color: var(--secondary-text);
+  margin-bottom: var(--spacing-lg);
+  font-size: 14px;
+}
+
+.testimonial-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Star Rating */
+.star-rating {
+  display: flex;
+  gap: 5px;
+  cursor: pointer;
+  margin-top: var(--spacing-xs);
+}
+
+.star-rating .star {
+  font-size: 28px;
+  color: var(--border-color);
+  transition: var(--transition-fast);
+}
+
+.star-rating .star:hover,
+.star-rating .star.active {
+  color: var(--accent-gold);
+}
+
+.star-rating .star.filled {
+  color: var(--accent-gold);
+}
+
+/* Customer Image Preview */
+#customerImagePreview {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+#customerImagePreview .image-preview-item {
+  width: 80px;
+  height: 80px;
+}
+
+#customerImagePreview .image-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+/* Remove customer testimonial photo */
+.remove-customer-image {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  background: var(--error);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Success message after submission */
+.testimonial-success-message {
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.testimonial-success-message svg {
+  width: 80px;
+  height: 80px;
+  color: var(--success);
+  margin-bottom: var(--spacing-md);
+}
+
+.testimonial-success-message h3 {
+  color: var(--success);
+  margin-bottom: var(--spacing-sm);
+}
+
+.testimonial-success-message p {
+  color: var(--secondary-text);
+}
+
+/* Responsive testimonial form */
+@media (max-width: 480px) {
+  .testimonial-modal {
+    margin: var(--spacing-sm);
+    max-width: calc(100% - var(--spacing-lg));
+  }
+  
+  .star-rating .star {
+    font-size: 24px;
+  }
 }
 
